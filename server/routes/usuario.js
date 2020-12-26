@@ -7,7 +7,30 @@ const Usuario = require("../models/usuario");
 const app = express();
 
 app.get("/usuario", (req, res) => {
-    res.json("get /usuario");
+    let numeroPagina = req.query.page || 0;
+    numeroPagina = Number(numeroPagina);
+    console.log(numeroPagina);
+
+    Usuario.find({}, "nombre email role estado google img")
+    .skip(5 * numeroPagina)
+    .limit(5)
+    .exec((err, usuarios) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        Usuario.count({}, (err, conteo) => {
+
+            res.json({
+                ok: true,
+                usuarios,
+                cuantos: conteo
+            });
+        });
+    });
 });
 
 app.post("/usuario", (req, res) => {
